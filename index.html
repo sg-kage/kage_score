@@ -13,80 +13,79 @@
   <script src="https://unpkg.com/lucide@latest/dist/lucide.js"></script>
   <style>
     body {
-      /* フォントをNoto Sans JPに変更 */
       font-family: 'Noto Sans JP', sans-serif;
     }
-    /* 等幅フォントを適用する要素にFira Codeを優先的に使用 */
     .font-mono {
       font-family: 'Fira Code', monospace;
     }
+    /* スクロール時のモバイルグリッド横スクロール */
+    #resultsGrid {
+      overflow-x: auto;
+    }
+    /* モバイルでグリッドが見やすいように */
+    @media (max-width: 640px) {
+      #resultsGrid > div {
+        min-width: 550px;
+      }
+    }
   </style>
 </head>
-<body class="bg-[#242424] text-slate-100 p-4 antialiased flex flex-col items-center min-h-screen">
+<body class="bg-[#242424] text-slate-100 p-2 antialiased flex flex-col items-center min-h-screen">
 
-  <!-- 全体のコンテナを元のサイズに戻しました -->
-  <div class="w-full max-w-6xl bg-[#3D3D3D] rounded-xl shadow-2xl p-6 md:p-8">
-    
-    <!-- タイトル入力欄を元のサイズに戻しました -->
-    <div class="flex items-center mb-6">
-      <!-- Lucide Icons (Edit) -->
-      <i data-lucide="edit" class="w-6 h-6 text-slate-400 mr-3"></i>
+  <div class="w-full max-w-2xl sm:max-w-3xl md:max-w-6xl bg-[#3D3D3D] rounded-xl shadow-2xl p-2 sm:p-4 md:p-8">
+    <!-- タイトル -->
+    <div class="flex items-center mb-4 sm:mb-6">
+      <i data-lucide="edit" class="w-6 h-6 text-slate-400 mr-2 sm:mr-3"></i>
       <input
         type="text"
         id="titleInput"
         value="タイトル"
-        class="w-full bg-[#242424] text-lg md:text-xl font-bold border-none rounded-lg py-2 px-4 focus:ring-2 focus:ring-green-500 focus:outline-none"
+        class="w-full bg-[#242424] text-base sm:text-lg md:text-xl font-bold border-none rounded-lg py-1 px-2 sm:py-2 sm:px-4 focus:ring-2 focus:ring-green-500 focus:outline-none"
       />
     </div>
 
-    <!-- 可変値入力セクションはよりコンパクトになりました -->
-    <div class="flex flex-col md:flex-row gap-4 mb-4">
-      
-      <!-- 相手HP入力 -->
+    <!-- 入力セクション -->
+    <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-2 sm:mb-4">
+      <!-- 相手HP -->
       <div class="flex-1 bg-[#242424] p-2 rounded-lg shadow-inner">
         <label class="block text-slate-300 text-xs mb-1">相手HP</label>
         <div class="flex items-center">
           <button id="decrementBaseValue" class="p-0.5 bg-slate-600 rounded-l-lg hover:bg-slate-500 transition-colors">
-            <!-- Lucide Icons (Minus) -->
             <i data-lucide="minus" class="w-4 h-4 text-slate-300"></i>
           </button>
           <input
             type="number"
             id="baseValueInput"
             value="1000000"
-            class="flex-1 text-center bg-[#242424] text-white font-mono text-lg py-0.5 focus:ring-2 focus:ring-green-500 focus:outline-none"
+            class="flex-1 text-center bg-[#242424] text-white font-mono text-base sm:text-lg py-0.5 focus:ring-2 focus:ring-green-500 focus:outline-none"
           />
           <button id="incrementBaseValue" class="p-0.5 bg-slate-600 rounded-r-lg hover:bg-slate-500 transition-colors">
-            <!-- Lucide Icons (Plus) -->
             <i data-lucide="plus" class="w-4 h-4 text-slate-300"></i>
           </button>
         </div>
       </div>
-
-      <!-- スコアPt入力 -->
+      <!-- スコアPt -->
       <div class="flex-1 bg-[#242424] p-2 rounded-lg shadow-inner">
         <label class="block text-slate-300 text-xs mb-1">スコアPt</label>
         <div class="flex items-center">
           <button id="decrementAdjustedValue" class="p-0.5 bg-slate-600 rounded-l-lg hover:bg-slate-500 transition-colors">
-            <!-- Lucide Icons (Minus) -->
             <i data-lucide="minus" class="w-4 h-4 text-slate-300"></i>
           </button>
           <input
             type="number"
             id="adjustedValueInput"
-            value="1500000"
-            class="flex-1 text-center bg-[#242424] text-white font-mono text-lg py-0.5 focus:ring-2 focus:ring-green-500 focus:outline-none"
+            value="600000"
+            class="flex-1 text-center bg-[#242424] text-white font-mono text-base sm:text-lg py-0.5 focus:ring-2 focus:ring-green-500 focus:outline-none"
           />
           <button id="incrementAdjustedValue" class="p-0.5 bg-slate-600 rounded-r-lg hover:bg-slate-500 transition-colors">
-            <!-- Lucide Icons (Plus) -->
             <i data-lucide="plus" class="w-4 h-4 text-slate-300"></i>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 計算結果グリッドのサイズを元に戻しました -->
-    <div class="bg-[#3D3D3D] rounded-lg shadow-lg overflow-hidden border border-slate-700">
+    <!-- 計算結果グリッド -->
+    <div class="bg-[#3D3D3D] rounded-lg shadow-lg overflow-x-auto border border-slate-700">
       <div id="resultsGrid">
         <!-- 計算結果はJavaScriptでここに挿入されます -->
       </div>
@@ -94,12 +93,9 @@
   </div>
 
   <script>
-    // Lucide IconsをDOMに適用
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
-    
-    // DOM要素の取得
     const titleInput = document.getElementById('titleInput');
     const baseValueInput = document.getElementById('baseValueInput');
     const adjustedValueInput = document.getElementById('adjustedValueInput');
@@ -109,41 +105,41 @@
     const incrementAdjustedValueBtn = document.getElementById('incrementAdjustedValue');
     const decrementAdjustedValueBtn = document.getElementById('decrementAdjustedValue');
 
-    // 計算ロジック
+    // 新しい数式に基づく計算ロジック
     const calculateResult = (baseValue, adjustedValue, percentage) => {
-      // 基準値(C4)と調整値(D8)の間をパーセンテージで線形に補間
-      const result = baseValue + (adjustedValue - baseValue) * (percentage / 100);
+      // percentage: 0 ～ 100, ExcelのH6相当
+      // adjusted: ($D$8 / (1 + H6) - 20000) / 280000
+      // result: ROUNDUP(base * adjusted, 0)
+      // percent: result / base
+      const h6 = percentage / 100;
+      const adjusted = (adjustedValue / (1 + h6) - 20000) / 280000;
+      const result = Math.ceil(baseValue * adjusted);
       const percent = result / baseValue;
-
-      // 数値のフォーマット
       const formattedPercent = (percent * 100).toFixed(2) + '%';
-      const formattedResult = new Intl.NumberFormat('ja-JP').format(Math.ceil(result));
+      const formattedResult = new Intl.NumberFormat('ja-JP').format(result);
 
-      // 最終的な文字列を結合して返す
       return `${formattedPercent} [${formattedResult}]`;
     };
 
-    // グリッドをレンダリングする関数
+    // グリッド表示
     const renderGrid = () => {
-      resultsGrid.innerHTML = ''; // グリッドをクリア
-
+      resultsGrid.innerHTML = '';
       const baseValue = Number(baseValueInput.value);
       const adjustedValue = Number(adjustedValueInput.value);
 
-      // Create header row
+      // ヘッダー
       const headerRow = document.createElement('div');
-      headerRow.className = 'grid grid-cols-5 md:grid-cols-5 border-b border-slate-700';
+      headerRow.className = 'grid grid-cols-5 border-b border-slate-700';
       const percentages = ['0%', '20%', '40%', '60%', '80%'];
       percentages.forEach((p, index) => {
         const headerDiv = document.createElement('div');
-        // ヘッダーのフォントサイズとパディングを調整
-        headerDiv.className = `text-center font-bold text-base md:text-lg py-1 bg-[#242424] border-r border-slate-700 ${index === 4 ? 'border-r-0' : ''}`;
+        headerDiv.className = `text-center font-bold text-base py-1 bg-[#242424] border-r border-slate-700 ${index === 4 ? 'border-r-0' : ''}`;
         headerDiv.textContent = p;
         headerRow.appendChild(headerDiv);
       });
       resultsGrid.appendChild(headerRow);
-      
-      // グリッドのコンテンツを生成
+
+      // データ分割
       const columnsData = [[], [], [], [], []];
       for (let i = 0; i <= 99; i++) {
         const columnIndex = Math.floor(i / 20);
@@ -151,29 +147,24 @@
           columnsData[columnIndex].push(i);
         }
       }
-      // 100%を最後の列に手動で追加
-      columnsData[4].push(100);
+      columnsData[4].push(100); // 100%を最後の列に追加
 
       const maxRows = Math.max(...columnsData.map(col => col.length));
       for (let rowIndex = 0; rowIndex < maxRows; rowIndex++) {
         const rowDiv = document.createElement('div');
-        rowDiv.className = 'grid grid-cols-5 md:grid-cols-5';
+        rowDiv.className = 'grid grid-cols-5';
         const isEven = rowIndex % 2 === 0;
-
         columnsData.forEach((column, colIndex) => {
           const p = column[rowIndex];
           const resultItem = document.createElement('div');
-          resultItem.className = `flex items-center text-xs md:text-sm py-1 px-2 border-b border-slate-700 ${isEven ? 'bg-[#242424]' : 'bg-[#3D3D3D]'} ${colIndex < 4 ? 'border-r' : ''}`;
-          
+          resultItem.className = `flex items-center text-xs sm:text-sm py-1 px-2 border-b border-slate-700 ${isEven ? 'bg-[#242424]' : 'bg-[#3D3D3D]'} ${colIndex < 4 ? 'border-r' : ''}`;
           if (p !== undefined) {
             const percentageDiv = document.createElement('div');
             percentageDiv.className = "w-1/4 pr-2 font-bold text-white whitespace-nowrap";
             percentageDiv.textContent = `${p}%`;
-
             const contentDiv = document.createElement('div');
             contentDiv.className = "flex-1 font-mono text-white text-left overflow-hidden overflow-ellipsis";
             contentDiv.textContent = calculateResult(baseValue, adjustedValue, p);
-            
             resultItem.appendChild(percentageDiv);
             resultItem.appendChild(contentDiv);
           }
@@ -183,7 +174,6 @@
       }
     };
 
-    // イベントリスナー
     const handleInput = () => {
       renderGrid();
     };
@@ -191,7 +181,6 @@
     baseValueInput.addEventListener('input', handleInput);
     adjustedValueInput.addEventListener('input', handleInput);
 
-    // インクリメント/デクリメントボタンのイベントリスナー
     incrementBaseValueBtn.addEventListener('click', () => {
       baseValueInput.value = Number(baseValueInput.value) + 10000;
       handleInput();
