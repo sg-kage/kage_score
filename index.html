@@ -18,13 +18,44 @@
     .font-mono {
       font-family: 'Fira Code', monospace;
     }
-    #resultsGrid {
+    #resultsGridWrapper {
       overflow-x: auto;
+      width: 100%;
+    }
+    #resultsGridTable {
+      width: 100%;
+      min-width: 600px;
+      table-layout: fixed;
+      font-size: 0.95rem;
+      border-collapse: collapse;
+    }
+    #resultsGridTable th, #resultsGridTable td {
+      padding: 4px 6px;
+      border-right: 1px solid #334155;
+      border-bottom: 1px solid #334155;
+      white-space: nowrap;
+      text-align: left;
+      background-color: #242424;
+      color: #fff;
+    }
+    #resultsGridTable th {
+      background-color: #242424;
+      font-weight: bold;
+      text-align: center;
+    }
+    #resultsGridTable th:last-child, #resultsGridTable td:last-child {
+      border-right: none;
+    }
+    #resultsGridTable tr:nth-child(even) td {
+      background-color: #3D3D3D;
     }
     @media (max-width: 640px) {
-      #resultsGrid > div {
-        min-width: 550px;
+      #resultsGridTable {
+        font-size: 0.70rem;
+        min-width: 520px;
       }
+      .sm\:text-lg { font-size: 1rem; }
+      .md\:text-xl { font-size: 1rem; }
     }
   </style>
 </head>
@@ -84,8 +115,10 @@
 
     <!-- 計算結果グリッド -->
     <div class="bg-[#3D3D3D] rounded-lg shadow-lg overflow-x-auto border border-slate-700">
-      <div id="resultsGrid" class="w-full">
-        <!-- 計算結果はJavaScriptでここに挿入されます -->
+      <div id="resultsGridWrapper">
+        <table id="resultsGridTable">
+          <!-- JSでここに挿入 -->
+        </table>
       </div>
     </div>
   </div>
@@ -97,7 +130,7 @@
     const titleInput = document.getElementById('titleInput');
     const baseValueInput = document.getElementById('baseValueInput');
     const adjustedValueInput = document.getElementById('adjustedValueInput');
-    const resultsGrid = document.getElementById('resultsGrid');
+    const resultsGridTable = document.getElementById('resultsGridTable');
     const incrementBaseValueBtn = document.getElementById('incrementBaseValue');
     const decrementBaseValueBtn = document.getElementById('decrementBaseValue');
     const incrementAdjustedValueBtn = document.getElementById('incrementAdjustedValue');
@@ -115,23 +148,21 @@
       return `${formattedPercent} [${formattedResult}]`;
     };
 
-    // グリッド表示
+    // グリッド表示（テーブル化）
     const renderGrid = () => {
-      resultsGrid.innerHTML = '';
+      resultsGridTable.innerHTML = '';
       const baseValue = Number(baseValueInput.value);
       const adjustedValue = Number(adjustedValueInput.value);
 
       // ヘッダー
-      const headerRow = document.createElement('div');
-      headerRow.className = 'grid grid-cols-[auto,auto,auto,auto,auto] border-b border-slate-700';
       const percentages = ['0%', '20%', '40%', '60%', '80%'];
+      const headerRow = document.createElement('tr');
       percentages.forEach((p, index) => {
-        const headerDiv = document.createElement('div');
-        headerDiv.className = `text-center font-bold text-base py-1 bg-[#242424] border-r border-slate-700 ${index === 4 ? 'border-r-0' : ''}`;
-        headerDiv.textContent = p;
-        headerRow.appendChild(headerDiv);
+        const th = document.createElement('th');
+        th.textContent = p;
+        headerRow.appendChild(th);
       });
-      resultsGrid.appendChild(headerRow);
+      resultsGridTable.appendChild(headerRow);
 
       // データ分割
       const columnsData = [[], [], [], [], []];
@@ -145,31 +176,18 @@
 
       const maxRows = Math.max(...columnsData.map(col => col.length));
       for (let rowIndex = 0; rowIndex < maxRows; rowIndex++) {
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'grid grid-cols-[auto,auto,auto,auto,auto]';
-        const isEven = rowIndex % 2 === 0;
+        const row = document.createElement('tr');
         columnsData.forEach((column, colIndex) => {
           const p = column[rowIndex];
-          const resultItem = document.createElement('div');
-          resultItem.className = `
-            flex items-center text-xs sm:text-sm py-1 px-2 border-b border-slate-700
-            ${isEven ? 'bg-[#242424]' : 'bg-[#3D3D3D]'}
-            ${colIndex < 4 ? 'border-r' : ''}
-            min-w-[120px] whitespace-nowrap
-          `;
+          const td = document.createElement('td');
           if (p !== undefined) {
-            const percentageDiv = document.createElement('div');
-            percentageDiv.className = "w-1/4 pr-2 font-bold text-white whitespace-nowrap";
-            percentageDiv.textContent = `${p}%`;
-            const contentDiv = document.createElement('div');
-            contentDiv.className = "flex-1 font-mono text-white text-left whitespace-nowrap min-w-[120px]";
-            contentDiv.textContent = calculateResult(baseValue, adjustedValue, p);
-            resultItem.appendChild(percentageDiv);
-            resultItem.appendChild(contentDiv);
+            td.innerHTML = `<span style="font-weight:bold;">${p}%</span> <span class="font-mono">${calculateResult(baseValue, adjustedValue, p)}</span>`;
+          } else {
+            td.textContent = '';
           }
-          rowDiv.appendChild(resultItem);
+          row.appendChild(td);
         });
-        resultsGrid.appendChild(rowDiv);
+        resultsGridTable.appendChild(row);
       }
     };
 
