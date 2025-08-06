@@ -18,11 +18,9 @@
     .font-mono {
       font-family: 'Fira Code', monospace;
     }
-    /* スクロール時のモバイルグリッド横スクロール */
     #resultsGrid {
       overflow-x: auto;
     }
-    /* モバイルでグリッドが見やすいように */
     @media (max-width: 640px) {
       #resultsGrid > div {
         min-width: 550px;
@@ -86,7 +84,7 @@
 
     <!-- 計算結果グリッド -->
     <div class="bg-[#3D3D3D] rounded-lg shadow-lg overflow-x-auto border border-slate-700">
-      <div id="resultsGrid">
+      <div id="resultsGrid" class="w-full">
         <!-- 計算結果はJavaScriptでここに挿入されます -->
       </div>
     </div>
@@ -107,10 +105,6 @@
 
     // 新しい数式に基づく計算ロジック
     const calculateResult = (baseValue, adjustedValue, percentage) => {
-      // percentage: 0 ～ 100, ExcelのH6相当
-      // adjusted: ($D$8 / (1 + H6) - 20000) / 280000
-      // result: ROUNDUP(base * adjusted, 0)
-      // percent: result / base
       const h6 = percentage / 100;
       const adjusted = (adjustedValue / (1 + h6) - 20000) / 280000;
       const result = Math.ceil(baseValue * adjusted);
@@ -129,7 +123,7 @@
 
       // ヘッダー
       const headerRow = document.createElement('div');
-      headerRow.className = 'grid grid-cols-5 border-b border-slate-700';
+      headerRow.className = 'grid grid-cols-[auto,auto,auto,auto,auto] border-b border-slate-700';
       const percentages = ['0%', '20%', '40%', '60%', '80%'];
       percentages.forEach((p, index) => {
         const headerDiv = document.createElement('div');
@@ -152,18 +146,23 @@
       const maxRows = Math.max(...columnsData.map(col => col.length));
       for (let rowIndex = 0; rowIndex < maxRows; rowIndex++) {
         const rowDiv = document.createElement('div');
-        rowDiv.className = 'grid grid-cols-5';
+        rowDiv.className = 'grid grid-cols-[auto,auto,auto,auto,auto]';
         const isEven = rowIndex % 2 === 0;
         columnsData.forEach((column, colIndex) => {
           const p = column[rowIndex];
           const resultItem = document.createElement('div');
-          resultItem.className = `flex items-center text-xs sm:text-sm py-1 px-2 border-b border-slate-700 ${isEven ? 'bg-[#242424]' : 'bg-[#3D3D3D]'} ${colIndex < 4 ? 'border-r' : ''}`;
+          resultItem.className = `
+            flex items-center text-xs sm:text-sm py-1 px-2 border-b border-slate-700
+            ${isEven ? 'bg-[#242424]' : 'bg-[#3D3D3D]'}
+            ${colIndex < 4 ? 'border-r' : ''}
+            min-w-[120px] whitespace-nowrap
+          `;
           if (p !== undefined) {
             const percentageDiv = document.createElement('div');
             percentageDiv.className = "w-1/4 pr-2 font-bold text-white whitespace-nowrap";
             percentageDiv.textContent = `${p}%`;
             const contentDiv = document.createElement('div');
-            contentDiv.className = "flex-1 font-mono text-white text-left overflow-hidden overflow-ellipsis";
+            contentDiv.className = "flex-1 font-mono text-white text-left whitespace-nowrap min-w-[120px]";
             contentDiv.textContent = calculateResult(baseValue, adjustedValue, p);
             resultItem.appendChild(percentageDiv);
             resultItem.appendChild(contentDiv);
